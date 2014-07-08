@@ -41,13 +41,23 @@
 					.attr("r", 4) //radius of dot
 					.on("click", function(){ //on click to run the chemspider generation of image
 						d3.selectAll(".molecule").remove(); //removes any previous on click action (anything of class molecule)
-						d3.selectAll("rect").remove(); //may be obsolete
+						//d3.selectAll("rect").remove(); //may be obsolete
 						//set variables for creating image and text labels
-						var xPos = parseFloat(d3.select(this).attr("cx"))+5;
-						var yPos = parseFloat(d3.select(this).attr("cy"))+5;
 						var Compound = d3.select(this).attr("compound");
 						var image_w = 200;
 						var image_h = 200;
+						var xPos_ideal = parseFloat(d3.select(this).attr("cx"))+5;
+						if (xPos_ideal + image_w > (width-padding)) {
+							var xPos_actual = xPos_ideal-((xPos_ideal+image_w)-width+padding);}
+							else {
+								var xPos_actual = xPos_ideal;
+							}
+						var yPos_ideal = parseFloat(d3.select(this).attr("cy"))+5;
+						if (yPos_ideal + image_h > (height-padding-axis_title)) {
+							var yPos_actual = yPos_ideal-((yPos_ideal+image_h)-height+padding+axis_title);}
+							else {
+								var yPos_actual = yPos_ideal;
+							}
 						var text_height = 30;
 						var image = d3.select(this).attr("data-inchi");
 						var image_encode = encodeURIComponent(image);
@@ -57,30 +67,30 @@
 							.attr("class","molecule")
 							.attr("width",image_w)
 							.attr("height",image_h+text_height)
-							.attr("x", xPos)
-							.attr("y",yPos)
+							.attr("x", xPos_actual)
+							.attr("y", yPos_actual)
 							.attr("fill","white");
 						svg.append("image") //places image (with white background) obtained from chemspider URL
 							.attr("class","molecule")
 							.attr("xlink:href",image_URL)
 							.attr("width", image_w)
 							.attr("height", image_h)
-							.attr("x", xPos)
-							.attr("y", yPos);
+							.attr("x", xPos_actual)
+							.attr("y", yPos_actual);
 						svg.append("rect") //makes grey rectangle fairly transparent, makes box stand out from graph
 							.attr("class","molecule")
 							.attr("width",image_w)
 							.attr("height",image_h+text_height)
-							.attr("x", xPos)
-							.attr("y",yPos)
+							.attr("x", xPos_actual)
+							.attr("y",yPos_actual)
 							.attr("stroke","black")
 							.attr("stroke-width",1)
 							.attr("fill","grey")
 							.attr("fill-opacity",0.1) ;
 						svg.append("text") //places compound text
 							.attr("class","molecule")
-							.attr("x",xPos+5)
-							.attr("y",yPos + image_h + 12)
+							.attr("x",xPos_actual+5)
+							.attr("y",yPos_actual + image_h + 12)
 							.text("Compound:"+Compound);
 						d3.selectAll(".molecule")
 							.on("click", function(){

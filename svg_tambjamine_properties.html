@@ -9,15 +9,15 @@
 		
     </head>
     <body>
+		
 		<script type="text/javascript">
-			
 			var width= 800,
 				height = 600,
 				margin = 50;
 			var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
-		
+				
 			d3.csv("data/tambjaminewithsmiles.csv",function(csv) { //currently all in one function
-				//setting up scales
+				//setting up variables and scales
 				var title = 40
 				var axis_title = 35
 				var padding = 35
@@ -28,6 +28,32 @@
 				var yscale = d3.scale.linear()
 					.domain([d3.min(csv, function(d) {return d.EC50;}), d3.max(csv, function (d) {return d.EC50;})])
 					.range([height-axis_title-padding, title])
+				//define dropdown for x-axis
+				var dropdownx = d3.select("body")
+					.append("p")
+					.append("text")
+					.text("Select x axis:")
+					.append("select")
+					.attr("name","x_select");
+				var optionsx = dropdownx.selectAll("option")
+					.data(headerRow)
+					.enter()
+					.append("option");
+				optionsx.text(function (d){return d;})
+					.attr("value",function(d){return d;});
+				//define dropdown for y-axis
+				var dropdowny = d3.select("body")
+					.append("p")
+					.append("text")
+					.text("Select y axis:")
+					.append("select")
+					.attr("name","y_select");
+				var optionsy = dropdowny.selectAll("option")
+					.data(headerRow)
+					.enter()
+					.append("option");
+				optionsy.text(function (d){return d;})
+					.attr("value",function(d){return d;});
 				//creates circles for each point x is ALOGPs and y is log(1/EC50), scale position of the point wrt the width and height
 				svg.selectAll("circle")
 					.data(csv)

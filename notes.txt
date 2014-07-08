@@ -1,0 +1,18 @@
+Ideas/ fixes to qsar svg 
+
+- change compound display so it doesn't go off the edge of the svg image. 
+this could either be extending the image? or calculating the position of the far edges and if this is
+ greater than the boundaries of the svg then it can move it to the other side/ shift it in by the 
+ difference between the values.
+ DONE
+ 
+ - change the webpage to allow selection of the property expected on the y.axis and on the x.axis
+ this would have to be selected from a list? which sets a variable with is referenced in the rest of the code.
+ - would need to only allow option to be selected if the values within them are numerical
+ 
+ - allow upload of a file - this could cause issues if the file does not have the same structure as is expected by the code
+ or if the structure cannot be determined by the code. It may be possible to read the first like of the code and set variables for each column header by looping the through the variables?
+ might not use javascript in that section?
+ 
+ - doesn't appear to load in internet explorer... d3 is 'undefined'
+ 

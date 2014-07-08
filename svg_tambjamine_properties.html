@@ -10,163 +10,158 @@
     </head>
     <body>
 		<script type="text/javascript">
-		
-
 			
-var width= 800,
-	height = 600,
-	margin = 50;
-	
-var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
-//currently all in one function
-d3.csv("data/tambjaminewithsmiles.csv",function(csv) {
-//setting up scales
-var title = 40
-var axis_title = 35
-var padding = 35
-var xscale=d3.scale.linear()
-	.domain([d3.min(csv, function(d) {return d.ALOGPs;}),d3.max(csv, function(d) {return d.ALOGPs;})])
-	.range([axis_title+padding, width-padding])
-	
-var yscale = d3.scale.linear()
-	.domain([d3.min(csv, function(d) {return d.EC50;}), d3.max(csv, function (d) {return d.EC50;})])
-	.range([height-axis_title-padding, title])
-
- //creates circles for each point x is ALOGPs and y is log(1/EC50), scale position of the point wrt the width and height
-  svg.selectAll("circle")
-	.data(csv)
-	.enter()
-    .append("circle")
-	.attr("class","point")
-	.attr("data-smiles", function (d) {return d.SMILES;})
-	.attr("data-inchi", function (d) {return d.InChi;})
-    .attr("cx",function(d) {return xscale(+d.ALOGPs);})
-    .attr("cy",function(d) {return yscale(+d.EC50);})
-	.attr("compound",function(d) {return (d.Compound);})
-    .attr("r", 4) //radius of dot
-	.on("click", function(){ //on click to run the chemspider generation of image
-		d3.selectAll(".molecule").remove();
-		d3.selectAll("rect").remove();
+			var width= 800,
+				height = 600,
+				margin = 50;
+			var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
 		
-		var xPos = parseFloat(d3.select(this).attr("cx"))+5;
-		var yPos = parseFloat(d3.select(this).attr("cy"))+5;
-		var Compound = d3.select(this).attr("compound");
-		var image_w = 200;
-		var image_h = 200;
-		var text_height = 30;
-		var image = d3.select(this).attr("data-inchi");
-		var image_encode = encodeURIComponent(image);
-		var image_URL = "http://parts.chemspider.com/ImagesHandler.ashx?inchi="+image_encode+"&w="+image_w+"&h="+image_h ;	
+			d3.csv("data/tambjaminewithsmiles.csv",function(csv) { //currently all in one function
+				//setting up scales
+				var title = 40
+				var axis_title = 35
+				var padding = 35
+				var xscale=d3.scale.linear()
+					.domain([d3.min(csv, function(d) {return d.ALOGPs;}),d3.max(csv, function(d) {return d.ALOGPs;})])
+					.range([axis_title+padding, width-padding])	
+				var yscale = d3.scale.linear()
+					.domain([d3.min(csv, function(d) {return d.EC50;}), d3.max(csv, function (d) {return d.EC50;})])
+					.range([height-axis_title-padding, title])
+				//creates circles for each point x is ALOGPs and y is log(1/EC50), scale position of the point wrt the width and height
+				svg.selectAll("circle")
+					.data(csv)
+					.enter()
+					.append("circle")
+					.attr("class","point")
+					.attr("data-smiles", function (d) {return d.SMILES;})
+					.attr("data-inchi", function (d) {return d.InChi;})
+					.attr("cx",function(d) {return xscale(+d.ALOGPs);})
+					.attr("cy",function(d) {return yscale(+d.EC50);})
+					.attr("compound",function(d) {return (d.Compound);})
+					.attr("r", 4) //radius of dot
+					.on("click", function(){ //on click to run the chemspider generation of image
+						d3.selectAll(".molecule").remove(); //removes any previous on click action (anything of class molecule)
+						d3.selectAll("rect").remove(); //may be obsolete
+						//set variables for creating image and text labels
+						var xPos = parseFloat(d3.select(this).attr("cx"))+5;
+						var yPos = parseFloat(d3.select(this).attr("cy"))+5;
+						var Compound = d3.select(this).attr("compound");
+						var image_w = 200;
+						var image_h = 200;
+						var text_height = 30;
+						var image = d3.select(this).attr("data-inchi");
+						var image_encode = encodeURIComponent(image);
+						var image_URL = "http://parts.chemspider.com/ImagesHandler.ashx?inchi="+image_encode+"&w="+image_w+"&h="+image_h ;	
 
-		svg.append("rect") //blocks out other points
-			.attr("class","molecule")
-			.attr("width",image_w)
-			.attr("height",image_h+text_height)
-			.attr("x", xPos)
-			.attr("y",yPos)
-			.attr("fill","white");
-		svg.append("image") //places image (with white background
-			.attr("class","molecule")
-			.attr("xlink:href",image_URL)
-			.attr("width", image_w)
-			.attr("height", image_h)
-			.attr("x", xPos)
-			.attr("y", yPos);
-		svg.append("rect") //makes grey rectangle
-			.attr("class","molecule")
-			.attr("width",image_w)
-			.attr("height",image_h+text_height)
-			.attr("x", xPos)
-			.attr("y",yPos)
-			.attr("stroke","black")
-			.attr("stroke-width",1)
-			.attr("fill","grey")
-			.attr("fill-opacity",0.1) ;
-		svg.append("text") //places compound text
-			.attr("class","molecule")
-			.attr("x",xPos+5)
-			.attr("y",yPos + image_h + 12)
-			.text("Compound:"+Compound);
-		d3.selectAll(".molecule")
-			.on("click", function(){
-			d3.selectAll(".molecule").remove();
-					
-			  ;})
-		;})	  
+						svg.append("rect") //blocks out other points that would show through otherwise
+							.attr("class","molecule")
+							.attr("width",image_w)
+							.attr("height",image_h+text_height)
+							.attr("x", xPos)
+							.attr("y",yPos)
+							.attr("fill","white");
+						svg.append("image") //places image (with white background) obtained from chemspider URL
+							.attr("class","molecule")
+							.attr("xlink:href",image_URL)
+							.attr("width", image_w)
+							.attr("height", image_h)
+							.attr("x", xPos)
+							.attr("y", yPos);
+						svg.append("rect") //makes grey rectangle fairly transparent, makes box stand out from graph
+							.attr("class","molecule")
+							.attr("width",image_w)
+							.attr("height",image_h+text_height)
+							.attr("x", xPos)
+							.attr("y",yPos)
+							.attr("stroke","black")
+							.attr("stroke-width",1)
+							.attr("fill","grey")
+							.attr("fill-opacity",0.1) ;
+						svg.append("text") //places compound text
+							.attr("class","molecule")
+							.attr("x",xPos+5)
+							.attr("y",yPos + image_h + 12)
+							.text("Compound:"+Compound);
+						d3.selectAll(".molecule")
+							.on("click", function(){
+								d3.selectAll(".molecule").remove();
+							;})
+					;})	  
 		  
-	//mouse over adds label and colours the spot
-	.on("mouseover", function(d){
-		d3.select(this)
-			.attr("fill","red");  //has a very small region
-		
-		var xPosition = parseFloat(d3.select(this).attr("cx"))+15
-		var yPosition = parseFloat(d3.select(this).attr("cy"))+15
-		
-		svg.append("text")
-			.attr("id","tooltip")
-			.attr("x", xPosition)
-			.attr("y", yPosition)
-			.text(d.InChi)  //the Inchi text is very long, would be good to wrap it
-			})
-	//mouse out removes label and colour	
-	.on("mouseout", function(d){
-		d3.select(this)
-			.attr("fill","black");
-		d3.select("#tooltip").remove()	
-			})
+					//mouse over adds label and colours the spot
+					.on("mouseover", function(d){
+						d3.select(this)
+							.attr("fill","red");  //has a very small region
+						var xPosition = parseFloat(d3.select(this).attr("cx"))+15
+						var yPosition = parseFloat(d3.select(this).attr("cy"))+15
+						svg.append("text") //adds text on mouse over
+							.attr("id","tooltip")
+							.attr("x", xPosition)
+							.attr("y", yPosition)
+							.text(d.InChi)  //the Inchi text is very long, would be good to wrap it
+					;})
+					//mouse out removes label and colour	
+					.on("mouseout", function(d){
+						d3.select(this)
+							.attr("fill","black");
+						d3.select("#tooltip").remove()	
+					;})
 
-//adds labels to each point with the compound name - if these are put after the axes not all display
-  svg.selectAll("text")
-	.data(csv)
-	.enter()
-	.append("text")
-	.text(function(d) {return d.Compound;})
-	.attr("x", function(d) {return xscale(+d.ALOGPs);})
-	.attr("y", function(d) {return yscale(+d.EC50);})	
+				//adds labels to each point with the compound name - if these are put after the axes not all display
+				svg.selectAll("text")
+					.data(csv)
+					.enter()
+					.append("text")
+					.text(function(d) {return d.Compound;})
+					.attr("x", function(d) {return xscale(+d.ALOGPs);})
+					.attr("y", function(d) {return yscale(+d.EC50);})
+					;			
 				
-//add axis
-	var xAxis = d3.svg.axis()
-		.scale(xscale)
-		.orient("bottom") //orients the labelling below the line
-	var yAxis = d3.svg.axis()
-		.scale(yscale)
-		.orient("left")
-		
-	svg.append("g")
-		.attr("class","axis")
-		.attr("transform", "translate(0," + (height - axis_title - padding) + ")")
-		.call(xAxis)
-	//x-axis label
-	svg.append("text")
-		.attr("class","axislabel")
-		.attr("x",(width)/2)
-		.attr("y", height-axis_title)
-		.text("ALOGPs")
-		
-	svg.append("g")
-		.attr("class", "axis")
-		.attr("transform", "translate(" +(axis_title+padding)+",0)")
-		.call(yAxis)
-//y-axis label	
-	svg.append("text")
-		.attr("class","axislabel")
-		.attr("transform", "rotate(-90)")
-		.attr("y", padding/2)
-		.attr("x", -(height/2))
-		.style("text-anchor", "middle")
-		.text("Log(1/EC50)")		
-
-	//add title
-	svg.append("text")
-		.attr("class","title")
-		.attr("x", height/2)
-		.attr("y", title/2)
-		.text("Plot of ALOGPs vs. Log(1/EC50)")
-			
-			  ;})
-	
-
-
+				//creates axis variables
+				var xAxis = d3.svg.axis()
+					.scale(xscale)
+					.orient("bottom") //orients the labelling below the line
+					; 
+				var yAxis = d3.svg.axis()
+					.scale(yscale)
+					.orient("left")
+					;
+				//add axes - x axis
+				svg.append("g")
+					.attr("class","axis")
+					.attr("transform", "translate(0," + (height - axis_title - padding) + ")")
+					.call(xAxis)
+					;
+				//x-axis label
+				svg.append("text")
+					.attr("class","axislabel")
+					.attr("x",(width)/2)
+					.attr("y", height-axis_title)
+					.text("ALOGPs")
+					;
+				//y axis
+				svg.append("g")
+					.attr("class", "axis")
+					.attr("transform", "translate(" +(axis_title+padding)+",0)")
+					.call(yAxis)
+					;
+				//y-axis label	
+				svg.append("text")
+					.attr("class","axislabel")
+					.attr("transform", "rotate(-90)")
+					.attr("y", padding/2)
+					.attr("x", -(height/2))
+					.style("text-anchor", "middle")
+					.text("Log(1/EC50)")
+					;
+				//add title to graph
+				svg.append("text")
+					.attr("class","title")
+					.attr("x", height/2)
+					.attr("y", title/2)
+					.text("Plot of ALOGPs vs. Log(1/EC50)")
+					;
+			;})
 		</script>
     </body>
 </html>  

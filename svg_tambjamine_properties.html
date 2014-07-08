@@ -4,7 +4,7 @@
     <head>
         <meta charset="utf-8">
         <title>D3 Test - edit</title>
-        <script type="text/javascript" src="d3/d3.js"></script>
+        <script type="text/javascript" src="../d3/d3.js"></script> <!-- is this the correct notation for the file location -->
 		<link rel="stylesheet" type="text/css" href="mainstyle.css">
 		
     </head>
@@ -21,6 +21,7 @@
 				var title = 40
 				var axis_title = 35
 				var padding = 35
+				var headerRow = Object.keys(csv[0]); //this converts the header rows of the csv file into an array
 				var xscale=d3.scale.linear()
 					.domain([d3.min(csv, function(d) {return d.ALOGPs;}),d3.max(csv, function(d) {return d.ALOGPs;})])
 					.range([axis_title+padding, width-padding])	

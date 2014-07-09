@@ -7,11 +7,11 @@
         <script type="text/javascript" src="../d3/d3.js"></script> <!-- is this the correct notation for the file location -->
 		<link rel="stylesheet" type="text/css" href="mainstyle.css">
 		
+		
     </head>
     <body>
 		<script type="text/javascript">
-			 
-				
+						
 			d3.csv("data/tambjaminewithsmiles.csv",function(csv) { //currently all in one function
 				//variables related to axis selection
 				var xChange = function(){
@@ -122,7 +122,7 @@
 									var image = d3.select(this).attr("data-inchi");
 									var image_encode = encodeURIComponent(image);
 									var image_URL = "http://parts.chemspider.com/ImagesHandler.ashx?inchi="+image_encode+"&w="+image_w+"&h="+image_h ;	
-
+	
 									svg.append("rect") //blocks out other points that would show through otherwise
 										.attr("class","molecule")
 										.attr("width",image_w)
@@ -157,18 +157,18 @@
 											d3.selectAll(".molecule").remove();
 										;})
 								;})	  
-		  
+		  		
 					//mouse over adds label and colours the spot
 					.on("mouseover", function(d){
 						d3.select(this)
 							.attr("fill","red");  //has a very small region
 						var xPosition = parseFloat(d3.select(this).attr("cx"))+15
 						var yPosition = parseFloat(d3.select(this).attr("cy"))+15
-						svg.append("text") //adds text on mouse over
+						d3.select("body").append("div") //adds text on mouse over
+							.attr("class","inchi")
 							.attr("id","tooltip")
-							.attr("x", xPosition)
-							.attr("y", yPosition)
-							.text(d.InChi)  //the Inchi text is very long, would be good to wrap it
+							.attr("style", "top:"+yPosition+"px; left:"+xPosition+"px")
+							.html(d.InChi)  //want to move the position relative to the x and y of the svg
 					;})
 					//mouse out removes label and colour	
 					.on("mouseout", function(d){
@@ -176,6 +176,7 @@
 							.attr("fill","black");
 						d3.select("#tooltip").remove()	
 					;})
+					
 
 				//adds labels to each point with the compound name - if these are put after the axes not all display
 				svg.selectAll("text")

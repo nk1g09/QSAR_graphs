@@ -11,12 +11,24 @@
     <body>
 		
 		<script type="text/javascript">
+			 
 			var width= 800,
-				height = 600,
-				margin = 50;
+				height = 400,
+				margin = 20;
 			var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
 				
 			d3.csv("data/tambjaminewithsmiles.csv",function(csv) { //currently all in one function
+				//updategraph function to select new axes
+				function updategraph(xaxis,yaxis){
+					return xaxis + yaxis;}
+				var xChange = function(){
+					xaxis_selected = d3.event.target.value
+					return xaxis_selected;
+				}
+				var yChange = function(){
+					yaxis_selected = d3.event.target.value
+					return yaxis_selected;
+				}
 				//setting up variables and scales
 				var title = 40
 				var axis_title = 35
@@ -34,7 +46,8 @@
 					.append("text")
 					.text("Select x axis:")
 					.append("select")
-					.attr("name","x_select");
+					.attr("name","x_select")
+					.attr("id","x_select");
 				var optionsx = dropdownx.selectAll("option")
 					.data(headerRow)
 					.enter()
@@ -47,13 +60,38 @@
 					.append("text")
 					.text("Select y axis:")
 					.append("select")
-					.attr("name","y_select");
+					.attr("name","y_select")
+					.attr("id","y_select");
 				var optionsy = dropdowny.selectAll("option")
 					.data(headerRow)
 					.enter()
 					.append("option");
 				optionsy.text(function (d){return d;})
 					.attr("value",function(d){return d;});
+				/*var xaxis_select = document.getElementById("x_select");
+				var xaxis_selected = xaxis_select.options[xaxis_select.selectedIndex].value;
+				var yaxis_select = document.getElementById("y_select");
+				var yaxis_selected = yaxis_select.options[yaxis_select.selectedIndex].value;
+				doesn't actually appear to function correctly 
+				*/
+				 //onchange events	
+				d3.select("#x_select").on("change", xChange);
+				d3.select("#y_select").on("change", yChange);
+				//button to update graph
+				d3.select("body")
+					.append("p")
+					.attr("id","update")
+					.append("input")
+					.attr("name","update_button")
+					.attr("type","button")
+					.attr("value","Update Graph")
+					.on("click",function(){
+						var xaxis_plot = xaxis_selected;
+						var yaxis_plot = yaxis_selected;
+						d3.select("#update").append("text").text(xaxis_selected + yaxis_selected)
+						d3.select("#update").append("text").text(xaxis_plot + yaxis_plot)
+					});
+				
 				//creates circles for each point x is ALOGPs and y is log(1/EC50), scale position of the point wrt the width and height
 				svg.selectAll("circle")
 					.data(csv)
@@ -174,7 +212,7 @@
 					.attr("class","axislabel")
 					.attr("x",(width)/2)
 					.attr("y", height-axis_title)
-					.text("ALOGPs")
+					.text("xaxis_plot")
 					;
 				//y axis
 				svg.append("g")

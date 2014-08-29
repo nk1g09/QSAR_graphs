@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<!-- This version has a graph with mouseover and on click it display a molecular structure on -->
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Test - edit</title>
+        <script type="text/javascript" src="../d3/d3.js"></script> <!-- is this the correct notation for the file location -->
+		<link rel="stylesheet" type="text/css" href="mainstyle.css">
+		
+		
+    </head>
+    <body>
+		<script type="text/javascript">
+						
+			d3.csv("data/tambjaminewithsmiles.csv",function(csv) { //currently all in one function
+				//variables related to axis selection
+				var xChange = function(){
+					xaxis_selected = d3.event.target.value
+					return xaxis_selected;
+				}
+				var yChange = function(){
+					yaxis_selected = d3.event.target.value
+					return yaxis_selected;
+				}
+				var headerRow = Object.keys(csv[0]); //this converts the header rows of the csv file into an array
+				//define dropdown for x-axis
+				var dropdownx = d3.select("body")
+					.append("p")
+					.append("text")
+					.text("Select x axis:")
+					.append("select")
+					.attr("name","x_select")
+					.attr("id","x_select");
+				var optionsx = dropdownx.selectAll("option") //for each value in the headerRow array it generates a dropdown option
+					.data(headerRow)
+					.enter()
+					.append("option");
+				optionsx.text(function (d){return d;})
+					.attr("value",function(d){return d;});
+				//define dropdown for y-axis
+				var dropdowny = d3.select("body")
+					.append("p")
+					.append("text")
+					.text("Select y axis:")
+					.append("select")
+					.attr("name","y_select")
+					.attr("id","y_select");
+				var optionsy = dropdowny.selectAll("option") //for each value in the headerRow array it generates a dropdown option
+					.data(headerRow)
+					.enter()
+					.append("option");
+				optionsy.text(function (d){return d;})
+					.attr("value",function(d){return d;});
+				//onchange events	
+				d3.select("#x_select").on("change", xChange);
+				d3.select("#y_select").on("change", yChange);
+				//button to update graph
+				d3.select("body")
+					.append("p")
+					.attr("id","update")
+					.append("input")
+					.attr("name","update_button")
+					.attr("type","button")
+					.attr("value","Generate Graph")
+					.on("click", function(){//insert full code for svg here... removes the existing body?
+						d3.selectAll("svg").remove(); //may need to change this if additional svgs are added below
+						d3.csv("data/tambjaminewithsmiles.csv",function(csv) {
+							var width= 800,
+								height = 400,
+								margin = 20;
+							var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+							var title = 40;
+							var axis_title = 35;
+							var padding = 35;
+							//var xaxis_plot = xaxis_selected;
+							min_x = d3.min(csv, function(d){return +d[xaxis_selected];})
+							max_x = d3.max(csv, function(d) {return +d[xaxis_selected];})
+							svg.append("p")
+								.append("text")
+								.text("min:"+min_x+" max:"+max_x)
+							var xscale=d3.scale.linear() //the use of d[xaxis_selected] returns the value of d.variable 
+								.domain([d3.min(csv, function(d){return +d[xaxis_selected];}),d3.max(csv, function(d) {return +d[xaxis_selected];})])
+								.range([axis_title+padding, width-padding])	;
+							var yscale = d3.scale.linear()
+								.domain([d3.min(csv, function(d) {return +d[yaxis_selected];}), d3.max(csv, function (d) {return +d[yaxis_selected];})])
+								.range([height-axis_title-padding, title]);
+							//creates circles for each point x is ALOGPs and y is log(1/EC50), scale position of the point wrt the width and height
+							svg.selectAll("circle")
+								.data(csv)
+								.enter()
+								.append("circle")
+								.attr("class","point")
+								.attr("data-smiles", function (d) {return d.SMILES;})
+								.attr("data-inchi", function (d) {return d.InChi;})
+								.attr("cx",function(d) {return xscale(+d[xaxis_selected]);})
+								.attr("cy",function(d) {return yscale(+d[yaxis_selected]);})
+								.attr("compound",function(d) {return (d.Compound);})
+								.attr("r", 4) //radius of dot
+								/*.attr("fill", function(d) {
+								if (d[xaxis_selected]==undefined) { return "yellow";}
+								})*/
+								.on("click", function(){ //on click to run the chemspider generation of image
+									d3.selectAll(".molecule").remove(); //removes any previous on click action (anything of class molecule)
+									//d3.selectAll("rect").remove(); //may be obsolete
+									//set variables for creating image and text labels
+									var Compound = d3.select(this).attr("compound");
+									var image_w = 200;
+									var image_h = 200;
+									var xPos_ideal = parseFloat(d3.select(this).attr("cx"))+5;
+									if (xPos_ideal + image_w > (width-padding)) {
+										var xPos_actual = xPos_ideal-((xPos_ideal+image_w)-width+padding);}
+									else {
+										var xPos_actual = xPos_ideal;
+									}
+									var yPos_ideal = parseFloat(d3.select(this).attr("cy"))+5;
+									if (yPos_ideal + image_h > (height-padding-axis_title)) {
+										var yPos_actual = yPos_ideal-((yPos_ideal+image_h)-height+padding+axis_title);}
+									else {
+										var yPos_actual = yPos_ideal;
+									}
+									var text_height = 30;
+									var image = d3.select(this).attr("data-inchi");
+									var image_encode = encodeURIComponent(image);
+									var image_URL = "http://parts.chemspider.com/ImagesHandler.ashx?inchi="+image_encode+"&w="+image_w+"&h="+image_h ;	
+	
+									svg.append("rect") //blocks out other points that would show through otherwise
+										.attr("class","molecule")
+										.attr("width",image_w)
+										.attr("height",image_h+text_height)
+										.attr("x", xPos_actual)
+										.attr("y", yPos_actual)
+										.attr("fill","white");
+									svg.append("image") //places image (with white background) obtained from chemspider URL
+										.attr("class","molecule")
+										.attr("xlink:href",image_URL)
+										.attr("width", image_w)
+										.attr("height", image_h)
+										.attr("x", xPos_actual)
+										.attr("y", yPos_actual);
+									svg.append("rect") //makes grey rectangle fairly transparent, makes box stand out from graph
+										.attr("class","molecule")
+										.attr("width",image_w)
+										.attr("height",image_h+text_height)
+										.attr("x", xPos_actual)
+										.attr("y",yPos_actual)
+										.attr("stroke","black")
+										.attr("stroke-width",1)
+										.attr("fill","grey")
+										.attr("fill-opacity",0.1) ;
+									svg.append("text") //places compound text
+										.attr("class","molecule")
+										.attr("x",xPos_actual+5)
+										.attr("y",yPos_actual + image_h + 12)
+										.text("Compound:"+Compound);
+									d3.selectAll(".molecule")
+										.on("click", function(){
+											d3.selectAll(".molecule").remove();
+										;})
+								;})	  
+		  		
+					//mouse over adds label and colours the spot
+					.on("mouseover", function(d){
+						d3.select(this)
+							.attr("fill","red");  //has a very small region
+						var xPosition = parseFloat(d3.select(this).attr("cx"))+15
+						var yPosition = parseFloat(d3.select(this).attr("cy"))+15
+						d3.select("body").append("div") //adds text on mouse over
+							.attr("class","inchi")
+							.attr("id","tooltip")
+							.attr("style", "top:"+yPosition+"px; left:"+xPosition+"px")
+							.html(d.InChi)  //want to move the position relative to the x and y of the svg
+					;})
+					//mouse out removes label and colour	
+					.on("mouseout", function(d){
+						d3.select(this)
+							.attr("fill","black");
+						d3.select("#tooltip").remove()	
+					;})
+					
+
+				//adds labels to each point with the compound name - if these are put after the axes not all display
+				svg.selectAll("text")
+					.data(csv)
+					.enter()
+					.append("text")
+					.text(function(d) {return d.Compound;})
+					.attr("x", function(d) {return xscale(+d[xaxis_selected]);})
+					.attr("y", function(d) {return yscale(+d[yaxis_selected]);})
+					;			
+				
+				//creates axis variables
+				var xAxis = d3.svg.axis()
+					.scale(xscale)
+					.orient("bottom") //orients the labelling below the line
+					; 
+				var yAxis = d3.svg.axis()
+					.scale(yscale)
+					.orient("left")
+					;
+				//add axes - x axis
+				svg.append("g")
+					.attr("class","axis")
+					.attr("transform", "translate(0," + (height - axis_title - padding) + ")")
+					.call(xAxis)
+					;
+				//x-axis label
+				svg.append("text")
+					.attr("class","axislabel")
+					.attr("x",(width)/2)
+					.attr("y", height-axis_title)
+					.text(xaxis_selected)
+					;
+				//y axis
+				svg.append("g")
+					.attr("class", "axis")
+					.attr("transform", "translate(" +(axis_title+padding)+",0)")
+					.call(yAxis)
+					;
+				//y-axis label	
+				svg.append("text")
+					.attr("class","axislabel")
+					.attr("transform", "rotate(-90)")
+					.attr("y", padding/2)
+					.attr("x", -(height/2))
+					.style("text-anchor", "middle")
+					.text(yaxis_selected)
+					;
+				//add title to graph
+				svg.append("text")
+					.attr("class","title")
+					.attr("x", width/2)
+					.attr("y", title/2)
+					.text("Plot of "+xaxis_selected+" vs. "+yaxis_selected)
+					.attr("text-anchor","middle")
+					;
+			;})
+			}
+					);	
+					
+					})
+
+				
+		</script>
+    </body>
+</html>  

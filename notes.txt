@@ -18,4 +18,6 @@ this could either be extending the image? or calculating the position of the far
  - doesn't appear to load in internet explorer... d3 is 'undefined'
  
  -need to change InChi text to be wrapped and also not move 'offscreen' like with the image overlay.
+ InChI text is now wrapped using div and html - but it does not position relative to the edge of the svg image. 
+ If the point is to the right of the svg it will just extend further to the right (still displaying)
  
